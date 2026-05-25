@@ -9,6 +9,8 @@ data/processed/*.csv
 data/database/*.db
 models/*.joblib
 models/*.json
+!models/bioenergy_model.joblib
+!models/model_metadata.json
 reports/figures/*.png
 
 # Claude Code (per-developer, no compartir)

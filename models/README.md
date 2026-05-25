@@ -1,12 +1,15 @@
 # Carpeta de modelos
 
-Los modelos entrenados se generan localmente y no se versionan en GitHub.
+Esta carpeta incluye los artefactos mínimos para que la aplicación Streamlit pueda cargar el predictor sin reentrenar en cada despliegue:
 
-Para regenerar el modelo:
+- `bioenergy_model.joblib`: pipeline entrenado con `HistGradientBoostingRegressor`.
+- `model_metadata.json`: métricas, columnas, categorías y valores por defecto para la interfaz.
+
+Para regenerar el modelo desde cero:
 
 ```bash
 python src/run_pipeline.py
 ```
 
-El archivo principal generado es `bioenergy_model.joblib`, junto con `model_metadata.json`.
+Los datos pesados (`data/raw`, `data/database` y CSV procesados grandes) siguen ignorados para mantener el repositorio ligero.
 
