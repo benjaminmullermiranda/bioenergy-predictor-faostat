@@ -17,14 +17,20 @@ st.caption("Predicción del valor de bioenergía usando FAOSTAT y contexto ASTI/
 @st.cache_resource
 def load_model():
     if not MODEL_PATH.exists() or not METADATA_PATH.exists():
-        return None, None
-    return joblib.load(MODEL_PATH), json.loads(METADATA_PATH.read_text())
+        return None, None, None
+    try:
+        return joblib.load(MODEL_PATH), json.loads(METADATA_PATH.read_text()), None
+    except Exception as exc:
+        return None, None, str(exc)
 
 
-model, metadata = load_model()
+model, metadata, load_error = load_model()
 
 if model is None:
-    st.warning("Aún no existe un modelo entrenado. Ejecuta: python src/run_pipeline.py")
+    st.warning("Aún no existe un modelo entrenado o no pudo cargarse correctamente.")
+    if load_error:
+        st.error(load_error)
+    st.info("Verifica que `models/bioenergy_model.joblib` y `models/model_metadata.json` existan en GitHub.")
     st.stop()
 
 metrics = metadata["metrics"]
