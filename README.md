@@ -6,6 +6,24 @@
 
 > Predicción del valor de bioenergía por país, año, ítem y tipo de medición usando datos públicos de FAOSTAT y técnicas de Machine Learning.
 
+<p align="center">
+  <a href="#problema-de-negocio">Problema</a> ·
+  <a href="#resultado-del-pipeline-ejecutado">Resultados</a> ·
+  <a href="#cómo-ejecutarlo">Ejecución</a> ·
+  <a href="src/app.py">App Streamlit</a> ·
+  <a href="web/faolab.html">Dashboard faolab</a> ·
+  <a href="notebooks/explore_actualizado.ipynb">Notebook</a>
+</p>
+
+| Área | Entregable |
+| --- | --- |
+| Datos | Descarga reproducible desde FAOSTAT bulk downloads y almacenamiento en SQLite. |
+| Machine Learning | Modelo `HistGradientBoostingRegressor` para estimar valores de bioenergía. |
+| Producto | App Streamlit para predicción y dashboard web `faolab` para presentación visual. |
+| Presentación | Notebook ejecutado, guion de pitch y evidencias del pipeline. |
+
+**Stack principal:** Python · pandas · scikit-learn · SQLite · Streamlit · React · FAOSTAT
+
 ## Problema de negocio
 
 El proyecto transforma datos públicos de FAOSTAT en una solución de Machine Learning para estimar el valor esperado de bioenergía por país, año, ítem y tipo de medición. La pregunta de negocio es:
@@ -28,7 +46,7 @@ La fuente solicitada fue `https://www.fao.org/faostat/en/#data/AF`. En el catál
 - `src/train_model.py`: entrenamiento, validación temporal y optimización de hiperparámetros.
 - `src/app.py`: aplicación web Streamlit para usar el modelo.
 - `web/`: dashboard React (faolab) con sección Arcade — videojuego pixel-art educativo.
-- `notebooks/explore.ipynb`: notebook de entrega con el flujo explicado.
+- `notebooks/explore_actualizado.ipynb`: notebook de entrega con el flujo explicado.
 - `presentation/pitch_5_minutos.md`: guion de presentación.
 
 ## Cómo ejecutarlo
