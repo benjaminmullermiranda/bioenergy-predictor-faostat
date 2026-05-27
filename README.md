@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.svg" alt="Bioenergía en el Sector Agroalimentario — Proyecto Final 4Geeks" width="100%"/>
+  <img src="docs/banner.png" alt="Bioenergía en el Sector Agroalimentario — Proyecto Final 4Geeks" width="100%"/>
 </p>
 
 # Proyecto Final 4Geeks · FAOSTAT
