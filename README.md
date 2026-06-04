@@ -1,93 +1,90 @@
-<p align="center">
-  <img src="docs/banner.png" alt="Bioenergía en el Sector Agroalimentario — Proyecto Final 4Geeks" width="100%"/>
-</p>
+# 🌱 Bioenergy Predictor — FAOSTAT
 
-# Proyecto Final 4Geeks · FAOSTAT
+Supervised ML model to predict bioenergy production and consumption values
+by country, year, item and measurement type, using public FAO data.
 
-> Predicción del valor de bioenergía por país, año, ítem y tipo de medición usando datos públicos de FAOSTAT y técnicas de Machine Learning.
+> **Team project** | My role: model training, hyperparameter optimization,
+> and data leakage audit.
 
-<p align="center">
-  <a href="#problema-de-negocio">Problema</a> ·
-  <a href="#resultado-del-pipeline-ejecutado">Resultados</a> ·
-  <a href="#cómo-ejecutarlo">Ejecución</a> ·
-  <a href="src/app.py">App Streamlit</a> ·
-  <a href="web/faolab.html">Dashboard faolab</a> ·
-  <a href="notebooks/explore_actualizado.ipynb">Notebook</a>
-</p>
+> **Deployment-ready**: includes `render.yaml` and Streamlit app configured
+> for cloud deployment.
 
-| Área | Entregable |
-| --- | --- |
-| Datos | Descarga reproducible desde FAOSTAT bulk downloads y almacenamiento en SQLite. |
-| Machine Learning | Modelo `HistGradientBoostingRegressor` para estimar valores de bioenergía. |
-| Producto | App Streamlit para predicción y dashboard web `faolab` para presentación visual. |
-| Presentación | Notebook ejecutado, guion de pitch y evidencias del pipeline. |
+---
 
-**Stack principal:** Python · pandas · scikit-learn · SQLite · Streamlit · React · FAOSTAT
+## 📊 Project Overview
 
-## Problema de negocio
+| | |
+|---|---|
+| **Dataset** | 101,995 rows × 29 columns |
+| **Source** | FAOSTAT (AF · AE · CISP · BE domains) |
+| **Target variable** | Bioenergy value in terajoules (TJ) |
+| **Model** | HistGradientBoostingRegressor |
+| **Best R² (log-target)** | 0.990 (full) · **0.816 (control variant)** |
+| **Deployment** | Streamlit · Render · React dashboard |
 
-El proyecto transforma datos públicos de FAOSTAT en una solución de Machine Learning para estimar el valor esperado de bioenergía por país, año, ítem y tipo de medición. La pregunta de negocio es:
+---
 
-> ¿Qué países, productos y condiciones históricas muestran mayor potencial de producción o uso de bioenergía dentro del sistema agroalimentario?
+## 🤖 My Contribution — Model Training & Audit
 
-La fuente solicitada fue `https://www.fao.org/faostat/en/#data/AF`. En el catálogo oficial de FAOSTAT, `AF` corresponde a **Agricultural Science and Technology: ASTI - Researchers**. Como ese dominio tiene solo 3.800 filas, se usa como fuente obligatoria/contextual y se enriquece el modelo con dominios FAOSTAT relacionados para cumplir mejor los requisitos de volumen y variables:
+### Model selection
+Chose `HistGradientBoostingRegressor` for its native tolerance to null values,
+efficiency on mixed tabular datasets, and ability to capture non-linear
+relationships without manual transformations.
 
-- `AF`: ASTI - Researchers, fuente pedida.
-- `AE`: ASTI - Expenditures, gasto en investigación agrícola.
-- `CISP`: Country Investment Statistics Profile, contexto macro e inversión.
-- `BE`: Bioenergy, tabla principal de modelado con más de 120.000 filas.
+### Hyperparameter optimization
+```python
+GridSearchCV(
+    estimator=HistGradientBoostingRegressor(),
+    param_grid={
+        'learning_rate': [0.05, 0.08, 0.1],
+        'max_iter': [100, 140, 200],
+        'max_leaf_nodes': [31, 50]
+    },
+    scoring='neg_root_mean_squared_error',
+    cv=5
+)
+```
+Best params: `learning_rate=0.08` · `max_iter=140` · `max_leaf_nodes=31`
 
-## Estructura
+### Data leakage audit
+Detected anomalous R²=0.990 caused by temporal lag variables
+(target_lag_1, target_lag_2, target_lag_3) with near-perfect correlation
+to the target. Trained a control variant using only macroeconomic and
+investment variables — R² dropped to 0.816, a realistic benchmark
+for production scenarios.
 
-- `src/data_download.py`: descarga reproducible desde URLs bulk oficiales de FAOSTAT.
-- `src/database.py`: almacena tablas en SQLite y ejecuta consultas `SELECT`, `JOIN` e `INSERT`.
-- `src/features.py`: construye el dataset final, lags temporales y variables predictoras.
-- `src/eda.py`: análisis descriptivo y gráficos.
-- `src/train_model.py`: entrenamiento, validación temporal y optimización de hiperparámetros.
-- `src/app.py`: aplicación web Streamlit para usar el modelo.
-- `web/`: dashboard React (faolab) con sección Arcade — videojuego pixel-art educativo.
-- `notebooks/explore_actualizado.ipynb`: notebook de entrega con el flujo explicado.
-- `presentation/pitch_5_minutos.md`: guion de presentación.
+| Variant | Predictors | R² | MAE (TJ) | Leakage risk |
+|---|---|---|---|---|
+| Full model | 26 | 0.990 | 60,528 | High |
+| Control variant | 14 | 0.816 | 236,876 | Mitigated |
 
-## Cómo ejecutarlo
+---
+
+## 🔁 Reproducible Pipeline
 
 ```bash
-cd "Proyecto Final 4geeks"
-python3 -m venv venv
-source venv/bin/activate
+# Clone and install
+git clone https://github.com/benjaminmullermiranda/bioenergy-predictor-faostat
 pip install -r requirements.txt
+
+# Run full pipeline (download → features → DB → EDA → train)
 python src/run_pipeline.py
+
+# Launch Streamlit app
 streamlit run src/app.py
 ```
 
-Para previsualizar el dashboard `faolab` con el videojuego:
+---
 
-```bash
-cd web && python -m http.server 8502
-# Abre http://localhost:8502/faolab.html
-```
+## 🛠 Tech Stack
 
-## Entrega por fases
+`Python` `scikit-learn` `pandas` `SQLite` `Streamlit` `Render`
+`HistGradientBoosting` `GridSearchCV` `React`
 
-1. Definición del problema: predicción del valor de bioenergía con contexto de investigación e inversión agrícola.
-2. Obtención de datos: descarga automática desde FAOSTAT bulk downloads.
-3. Almacenamiento: SQLite en `data/database/faostat_project.db`.
-4. Análisis descriptivo: estadísticas en `data/processed/descriptive_statistics.csv` y resumen en `eda_summary.json`.
-5. EDA: gráficos en `reports/figures/` y partición temporal train/test.
-6. Modelo: `HistGradientBoostingRegressor` con búsqueda de hiperparámetros y métricas guardadas.
-7. Despliegue: app Streamlit lista para Render con `render.yaml`.
+---
 
-## Resultado del pipeline ejecutado
+## 👥 Team
 
-- Dataset final: 101.995 filas × 29 columnas.
-- Predictores usados por el modelo: 26.
-- Partición: 84.749 filas train y 17.246 filas test.
-- Modelo final: `HistGradientBoostingRegressor`.
-- Mejores hiperparámetros: `learning_rate=0.08`, `max_iter=140`, `max_leaf_nodes=31`.
-- Métricas: MAE `60.528`, RMSE `641.472`, R² sobre objetivo logarítmico `0.990`.
-
-## Fuentes
-
-- FAOSTAT: https://www.fao.org/faostat/en/#data
-- Catálogo bulk FAOSTAT: https://bulks-faostat.fao.org/production/datasets_E.json
-- Dataset AF: https://bulks-faostat.fao.org/production/ASTI_Researchers_E_All_Data_(Normalized).zip
+Collaborative project developed as the final capstone of the
+**4Geeks Academy Data Science & ML Bootcamp**.
+Original repository: [Dragcessa1998/Proyecto-Final](https://github.com/Dragcessa1998/Proyecto-Final-4geeks-bioenerg-a-en-el-sector-agroalimentario)
